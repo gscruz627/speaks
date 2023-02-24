@@ -7,3 +7,4 @@ const TopicSchema = new mongoose.Schema({
 })
 
 const Topic = mongoose.model("Topic", TopicSchema);
+export default Topic;

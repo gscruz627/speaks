@@ -13,6 +13,7 @@ router.patch("/story/:id/disagree", verifyToken, disagreeController);
 router.patch("/story/:id/rate", verifyToken, rateController);
 router.patch("/comment/:id/agree", verifyToken, commentAgreeController);
 router.patch("/comment/:id/disagree", verifyToken, disagreeCommentController);
+
 router.delete("/story/:id", verifyToken, deleteStoryController);
-router.delete("/story/:id/comment", verifyToken, deleteComentController);
+router.delete("/story/:id/comment", verifyToken, deleteCommentController);
 export default router;

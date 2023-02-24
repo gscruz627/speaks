@@ -72,5 +72,5 @@ app.use("auth", authRoutes);
 app.post("/auth/register", upload.single('file'), registerController);
 app.post("/newStory", upload.single("file"), newStoryController);
 
-app.listen(3000);
+app.listen(8080);
 export { cloudinary, uploadImage }
