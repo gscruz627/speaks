@@ -9,6 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import {v2 as cloudinary} from "cloudinary";
 import authRoutes from "./routes/authRoutes.js";
+import storyRoutes from "./routes/storyRoutes.js"
 import { registerController } from "./controllers/authControllers.js"
 import { newStoryController } from "./controllers/storyControllers.js";
 import multer from "multer";
@@ -53,6 +54,8 @@ function uploadImage(imageBuffer){
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
+
 mongoose
   .connect(db_string, {
     useUnifiedTopology: true,
@@ -65,12 +68,14 @@ mongoose
     console.log("MONGO error: " + err);
   });
 
+app.use("/public/assets/", express.static(__dirname + "/public/assets/"));
 app.get("/", (req, res) => {
   res.status(200).json( { message: "working"})
 });
-app.use("auth", authRoutes);
+app.use("/auth", authRoutes);
+app.use("/", storyRoutes);
 app.post("/auth/register", upload.single('file'), registerController);
 app.post("/newStory", upload.single("file"), newStoryController);
 
 app.listen(8080);
-export { cloudinary, uploadImage }
+export { cloudinary, uploadImage, __dirname }

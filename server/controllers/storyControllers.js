@@ -17,10 +17,20 @@ const getStoryController = async (req, res) => {
 
 const getAllStoriesControllers = async (req, res) => {
   try {
-    const stories = await Story.find();
+    const stories = await Story.find().lean();
+
+    for (let i = 0; i < stories.length; i++) {
+      const story = stories[i];
+      story.commentsFull = await Promise.all(
+        story.comments.map((id) => Comment.findById(id))
+      );
+    }
+
     res.status(200).json(stories);
   } catch (err) {
-    res.status(400).json({ err: "Error on handling getAlStories: " + err });
+    res
+      .status(400)
+      .json({ err: "Error on handling getAlStories: " + err.message });
   }
 };
 
@@ -103,7 +113,9 @@ const newCommentController = async (req, res) => {
       text,
     });
     const savedComment = await comment.save();
-    res.status(200).json(savedComment);
+    await Story.updateOne({_id: id}, { $push: {comments:  savedComment._id}});
+    const savedStory = await story.save();
+    res.status(200).json(savedStory);
   } catch (err) {
     res.status(400).json({ err: "Error on new comment: " + err });
   }
@@ -218,11 +230,9 @@ const deleteStoryController = async (req, res) => {
     if (userId === story.userId) {
       await Story.deleteOne({ _id: id });
     } else {
-      res
-        .status(500)
-        .json({
-          err: "Fatal, deleting foreign story, DO NOT BYPASS OWNER MATCHING, warning: ",
-        });
+      res.status(500).json({
+        err: "Fatal, deleting foreign story, DO NOT BYPASS OWNER MATCHING, warning: ",
+      });
     }
     res.status(200).json({ msg: "Deleted story succesfully" });
   } catch (err) {
@@ -240,11 +250,9 @@ const deleteCommentController = async (req, res) => {
     if (userId === story.userId) {
       await Story.deleteOne({ _id: id });
     } else {
-      res
-        .status(500)
-        .json({
-          err: "Fatal, deleting foreign comment, DO NOT BYPASS OWNER MATCHING, warning: ",
-        });
+      res.status(500).json({
+        err: "Fatal, deleting foreign comment, DO NOT BYPASS OWNER MATCHING, warning: ",
+      });
     }
     res.status(200).json({ msg: "Deleted comment succesfully" });
   } catch (err) {

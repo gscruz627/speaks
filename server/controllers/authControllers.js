@@ -1,4 +1,4 @@
-import { cloudinary, uploadImage } from "../index.js";
+import { cloudinary, uploadImage, __dirname } from "../index.js";
 import User from "../models/User.js";
 import Comment from "../models/Comment.js";
 import Story from "../models/Story.js";
@@ -19,24 +19,19 @@ const registerController = async (req, res) => {
       email,
       password: hashedPassword,
     });
-    if (req.file.buffer) {
+    if (req.file) {
       uploadImage(req.file.buffer).then(async (secure_url) => {
         user.userPicturePath = secure_url;
         const savedUser = await user.save();
         res.status(200).json(savedUser);
       });
     } else {
-      user.userPicturePath = path.join(
-        __dirname,
-        "public",
-        "assets",
-        "unknownProfilePicture.png"
-      );
+      user.userPicturePath = "unknownProfilePicture.png";
       const savedUser = await user.save();
       res.status(200).json(savedUser);
     }
   } catch (err) {
-    res.status(400).json({ error: err, code: "first" });
+    res.status(400).json({ error: err.message, code: "first" });
   }
 };
 const loginController = async (req, res) => {
@@ -55,9 +50,9 @@ const loginController = async (req, res) => {
       return res.status(400).json({ error: "Server Authentication Failed" });
     const token = jwt.sign({ id: user._id }, JWT_SIGNATURE);
     delete user.password;
-    res.status(200).json({ token: token });
+    res.status(200).json({ user: user, token: token });
   } catch (err) {
-    res.status(400).json({ err: "Error on login logic: " + err });
+    res.status(400).json({ err: "Error on login logic: " + err.message });
   }
 };
 const getUserController = async (req, res) => {
